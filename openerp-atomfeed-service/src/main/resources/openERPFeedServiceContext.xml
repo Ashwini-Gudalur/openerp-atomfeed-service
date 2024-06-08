@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+    <beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:task="http://www.springframework.org/schema/task" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context-3.0.xsd
+       http://www.springframework.org/schema/task
+       http://www.springframework.org/schema/task/spring-task-3.0.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+       http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd">
+
+    <context:spring-configured/>
+    <context:annotation-config/>
+
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:erp-atomfeed.properties</value>
+                <value>${APP_PROPERTIES_FILE}</value>
+            </list>
+        </property>
+        <property name="ignoreResourceNotFound" value="true"/>
+        <property name="searchSystemEnvironment" value="true"/>
+        <property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE"/>
+    </bean>
+
+
+    <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <property name="driverClass" value="${jdbc.driverClassName}"/>
+        <property name="jdbcUrl" value="${jdbc.url}"/>
+        <property name="user" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="maxPoolSize" value="${atomdb.c3p0.max_size}"/>
+        <property name="minPoolSize" value="${atomdb.c3p0.min_size}"/>
+        <property name="checkoutTimeout" value="${atomdb.c3p0.timeout}"/>
+        <property name="maxStatements" value="${atomdb.c3p0.max_statements}"/>
+        <property name="idleConnectionTestPeriod" value="${atomdb.c3p0.idle_test_period}"/>
+        <property name="acquireIncrement" value="${atomdb.c3p0.acquire_increment}"/>
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    <import resource="classpath:applicationContext-openerp-client.xml"/>
+    <import resource="classpath:erp-atomfeed-context.xml"/>
+    <import resource="classpath:jobs-context.xml"/>
+
+
+    <context:component-scan base-package="org.bahmni.feed.openerp">
+        <context:exclude-filter type="regex" expression="org\.bahmni\.feed\.openerp\.controller\..*"/>
+    </context:component-scan>
+
+
+</beans>
